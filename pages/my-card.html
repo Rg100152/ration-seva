@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Raj Gautam">
+  <title>My Ration Card - Ration Seva</title>
+  <link rel="icon" href="../images/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/shared.css">
+</head>
+<body>
+  <div class="tricolor-top"></div>
+  <div id="navbar"></div>
+
+  <main class="container-narrow">
+    <div class="breadcrumb"><a href="dashboard.html">Dashboard</a><span>&rsaquo;</span><span>My Card</span></div>
+    <div class="page-header">
+      <h1>My Ration Card</h1>
+      <p>Official digital ration card details.</p>
+    </div>
+
+    <div id="alert"></div>
+    <div id="cardContainer"><div class="empty-state"><div class="spinner"></div><p style="margin-top:14px">Loading...</p></div></div>
+  </main>
+
+  <div id="footer"></div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/mock-api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/nav.js"></script>
+  <script>
+    const user = requireAuth(['beneficiary']);
+    if (user) load();
+
+    async function load() {
+      try {
+        const card = await apiCall(`/beneficiary/my-card/${user.id}`);
+        const q = card.monthlyQuota;
+
+        document.getElementById('cardContainer').innerHTML = `
+          <div class="ration-card">
+            <div class="rc-top">
+              <div>
+                <div class="rc-label">Ration Card Number</div>
+                <div class="rc-number">${escapeHtml(card.cardNumber)}</div>
+              </div>
+              <div style="font-size:38px;line-height:1">&#127806;</div>
+            </div>
+            <div class="rc-grid">
+              <div><span>Card Holder</span><strong>${escapeHtml(user.name)}</strong></div>
+              <div><span>Category</span><strong>${escapeHtml(card.category)}</strong></div>
+              <div><span>Status</span><strong>${card.isActive ? '\u2713 Active' : '\u2717 Inactive'}</strong></div>
+              <div><span>Issued</span><strong>${formatDate(card.issuedDate)}</strong></div>
+            </div>
+          </div>
+
+          <div class="card mt-24">
+            <h3 class="card-title">Monthly Quota</h3>
+            <div class="quota-grid">
+              <div class="quota-tile"><div class="emoji">&#127834;</div><strong>${q.rice} kg</strong><span>Rice</span></div>
+              <div class="quota-tile"><div class="emoji">&#127806;</div><strong>${q.wheat} kg</strong><span>Wheat</span></div>
+              <div class="quota-tile"><div class="emoji">&#127852;</div><strong>${q.sugar} kg</strong><span>Sugar</span></div>
+              <div class="quota-tile"><div class="emoji">&#128739;</div><strong>${q.kerosene} L</strong><span>Kerosene</span></div>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-12">
+            <a href="history.html" class="btn btn-outline">View History</a>
+            <a href="dashboard.html" class="btn btn-outline">&larr; Back</a>
+          </div>
+        `;
+      } catch (err) {
+        showAlert('alert', err.message, 'danger');
+        document.getElementById('cardContainer').innerHTML = '';
+      }
+    }
+  </script>
+</body>
+</html>

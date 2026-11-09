@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Raj Gautam">
+  <title>Dashboard - Shopkeeper | Ration Seva</title>
+  <link rel="icon" href="../images/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/shared.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+  <div class="tricolor-top"></div>
+  <div id="navbar"></div>
+
+  <main class="container">
+    <div class="breadcrumb"><a href="dashboard.html">Dashboard</a><span>&rsaquo;</span><span>Shop Overview</span></div>
+
+    <div class="page-header">
+      <h1>Shopkeeper Dashboard</h1>
+      <p>Manage ration distribution at your Fair Price Shop.</p>
+    </div>
+
+    <div id="alert"></div>
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card"><div class="spinner" style="border-top-color:#fff"></div></div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">Quick Actions</h3>
+      <div class="flex flex-wrap gap-12">
+        <a href="check-card.html" class="btn btn-primary">&#128269; Verify Card</a>
+        <a href="distribute.html" class="btn btn-secondary">&#128230; Distribute Ration</a>
+        <a href="shop-history.html" class="btn btn-outline">&#128203; My History</a>
+        <a href="profile.html" class="btn btn-outline">&#128100; Profile</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-row">
+        <h3 class="card-title">Recent Distributions</h3>
+        <a href="shop-history.html" style="font-size:13px;font-weight:700;text-decoration:none">View All &rarr;</a>
+      </div>
+      <div id="recentDist"><div class="spinner"></div></div>
+    </div>
+  </main>
+
+  <div id="footer"></div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/mock-api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/nav.js"></script>
+  <script>
+    const user = requireAuth(['shopkeeper']);
+    if (user) load();
+
+    async function load() {
+      try {
+        const list = await apiCall(`/shopkeeper/distributions/${user.id}`);
+        const month = new Date().toISOString().slice(0, 7);
+        const monthDist = list.filter((d) => d.month === month);
+        const totalAmt = list.reduce((s, d) => s + d.totalAmount, 0);
+        const units = monthDist.reduce(
+          (s, d) => s + d.items.reduce((a, i) => a + i.quantity, 0),
+          0
+        );
+
+        document.getElementById('statsGrid').innerHTML = `
+          <div class="stat-card"><div class="stat-icon">&#128230;</div><h3>${list.length}</h3><p>Total Distributions</p></div>
+          <div class="stat-card"><div class="stat-icon">&#128197;</div><h3>${monthDist.length}</h3><p>This Month</p></div>
+          <div class="stat-card"><div class="stat-icon">&#128176;</div><h3>${formatINR(totalAmt)}</h3><p>Total Value</p></div>
+          <div class="stat-card"><div class="stat-icon">&#9878;&#65039;</div><h3>${units}</h3><p>Units This Month</p></div>
+        `;
+
+        const recent = list.slice(0, 5);
+        if (!recent.length) {
+          document.getElementById('recentDist').innerHTML = `
+            <div class="empty-state"><div class="icon">&#128237;</div><p>No distributions yet</p></div>
+          `;
+        } else {
+          document.getElementById('recentDist').innerHTML = `
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>Card</th><th>Month</th><th>Amount</th><th>Date</th></tr></thead>
+                <tbody>
+                  ${recent.map((d) => `
+                    <tr>
+                      <td class="mono"><strong>${escapeHtml(d.cardNumber)}</strong></td>
+                      <td>${escapeHtml(d.month)}</td>
+                      <td>${formatINR(d.totalAmount)}</td>
+                      <td>${formatDate(d.distributedAt)}</td>
+                    </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        }
+      } catch (err) {
+        showAlert('alert', err.message, 'danger');
+      }
+    }
+  </script>
+</body>
+</html>

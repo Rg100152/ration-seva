@@ -1,0 +1,50 @@
+/* Ration Seva - dashboard-only styles. Developer: Raj Gautam. */
+
+.dashboard-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  color: #3730a3;
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.dashboard-note strong {
+  color: #1e3a8a;
+}
+
+.dashboard-note .note-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.table-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.stat-card.alt {
+  background: linear-gradient(135deg, #0f766e, #10b981);
+}
+
+.stat-card.accent {
+  background: linear-gradient(135deg, #b45309, #f59e0b);
+}
+
+@media (max-width: 768px) {
+  .dashboard-note {
+    font-size: 12.5px;
+  }
+}

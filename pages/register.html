@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Raj Gautam">
+  <title>Register - Ration Seva</title>
+  <link rel="icon" href="../images/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/shared.css">
+</head>
+<body>
+  <div class="tricolor-top"></div>
+  <div class="auth-bg">
+    <div class="auth-card wide">
+      <div class="auth-logo">
+        <div class="icon">&#127806;</div>
+        <h1>Create Account</h1>
+        <p>Join Ration Seva by Raj Gautam</p>
+      </div>
+
+      <div id="alert"></div>
+
+      <form id="registerForm" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="name">Full Name</label>
+          <input type="text" id="name" class="form-input" placeholder="Your full name" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="aadhaar">Aadhaar Number</label>
+          <input type="text" id="aadhaar" class="form-input" inputmode="numeric" maxlength="12" placeholder="12-digit Aadhaar" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input type="password" id="password" class="form-input" minlength="8" placeholder="At least 8 characters" required>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="phone">Phone</label>
+            <input type="tel" id="phone" class="form-input" inputmode="numeric" maxlength="10" placeholder="10-digit mobile" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="familyMembers">Family Members</label>
+            <input type="number" id="familyMembers" class="form-input" value="1" min="1" max="20" required>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="category">Category</label>
+            <select id="category" class="form-select">
+              <option value="BPL">BPL</option>
+              <option value="APL">APL</option>
+              <option value="AAY">AAY</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="role">Role</label>
+            <select id="role" class="form-select">
+              <option value="beneficiary">Beneficiary</option>
+              <option value="shopkeeper">Shopkeeper</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="address">Address</label>
+          <input type="text" id="address" class="form-input" placeholder="House, street, city" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="registerBtn">Create Account</button>
+      </form>
+
+      <p class="auth-footer">Already registered? <a href="login.html">Login</a></p>
+    </div>
+  </div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/mock-api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/auth.js"></script>
+</body>
+</html>

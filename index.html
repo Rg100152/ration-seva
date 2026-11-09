@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Raj Gautam">
+  <meta name="description" content="Ration Seva - India's digital Public Distribution System. Check your quota, verify distributions and manage ration cards.">
+  <title>Ration Seva - Digital PDS | by Raj Gautam</title>
+  <link rel="icon" href="images/favicon.ico">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1E40AF">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/shared.css">
+</head>
+<body>
+  <div class="tricolor-top"></div>
+  <div id="navbar"></div>
+
+  <main>
+    <section class="hero" aria-label="Hero">
+      <div class="hero-slide active" style="background-image:url('images/banner1.png')"></div>
+      <div class="hero-slide" style="background-image:url('images/banner2.png')"></div>
+      <div class="hero-slide" style="background-image:url('images/banner3.png')"></div>
+      <div class="hero-slide" style="background-image:url('images/hero.png')"></div>
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <span class="hero-kicker">Digital Public Distribution System</span>
+        <h1>Your Ration,<br><span>Simplified.</span></h1>
+        <p>
+          Check your monthly quota, verify distributions and manage ration cards from your phone.
+          Transparent, secure and built for every family.
+        </p>
+        <div class="hero-btns">
+          <a href="pages/register.html" class="btn btn-primary">Get Started &rarr;</a>
+          <a href="pages/login.html" class="btn btn-outline">Login</a>
+          <a href="pages/about.html" class="btn btn-outline">Learn More</a>
+        </div>
+      </div>
+      <div class="hero-dots" id="heroDots"></div>
+    </section>
+
+    <section class="landing-section">
+      <div class="section-head">
+        <h2>Monthly entitlement, at a glance</h2>
+        <p>Quota is calculated automatically from your category and family size.</p>
+      </div>
+      <div class="quota-strip">
+        <div class="quota-pill"><div class="emoji">&#127834;</div><strong>Rice</strong><span>per family</span></div>
+        <div class="quota-pill"><div class="emoji">&#127806;</div><strong>Wheat</strong><span>per family</span></div>
+        <div class="quota-pill"><div class="emoji">&#127852;</div><strong>Sugar</strong><span>per family</span></div>
+        <div class="quota-pill"><div class="emoji">&#128739;</div><strong>Kerosene</strong><span>per family</span></div>
+      </div>
+    </section>
+
+    <section class="landing-section alt">
+      <div class="section-head">
+        <h2>Why Ration Seva?</h2>
+        <p>Built for India's ration card holders, shopkeepers and administrators.</p>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-box">
+          <div class="feature-icon">&#9889;</div>
+          <h3>Instant Verification</h3>
+          <p>Check a ration card and its monthly quota in seconds using the card number.</p>
+        </div>
+        <div class="feature-box">
+          <div class="feature-icon">&#128274;</div>
+          <h3>Bank-grade Security</h3>
+          <p>JWT sessions, bcrypt password hashing and role-based access control on every route.</p>
+        </div>
+        <div class="feature-box">
+          <div class="feature-icon">&#128241;</div>
+          <h3>Digital Receipts</h3>
+          <p>Every distribution is logged with a unique receipt. No paper slips required.</p>
+        </div>
+        <div class="feature-box">
+          <div class="feature-icon">&#129302;</div>
+          <h3>AI Fraud Detection</h3>
+          <p>A Python machine-learning service scores each transaction and flags anomalies.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section">
+      <div class="section-head">
+        <h2>Inside Ration Seva</h2>
+        <p>A look at the platform and the people it serves.</p>
+      </div>
+      <div class="gallery-grid">
+        <img src="images/gallery-01.png" alt="Ration Seva gallery 1" loading="lazy">
+        <img src="images/gallery-02.png" alt="Ration Seva gallery 2" loading="lazy">
+        <img src="images/gallery-03.png" alt="Ration Seva gallery 3" loading="lazy">
+        <img src="images/gallery-04.png" alt="Ration Seva gallery 4" loading="lazy">
+        <img src="images/gallery-05.png" alt="Ration Seva gallery 5" loading="lazy">
+        <img src="images/gallery-06.png" alt="Ration Seva gallery 6" loading="lazy">
+        <img src="images/gallery-07.png" alt="Ration Seva gallery 7" loading="lazy">
+        <img src="images/gallery-08.png" alt="Ration Seva gallery 8" loading="lazy">
+      </div>
+    </section>
+
+    <section class="landing-section alt">
+      <div class="section-head">
+        <h2>Ready to get started?</h2>
+        <p>Create an account as a beneficiary or shopkeeper, or login with a demo account.</p>
+      </div>
+      <div class="center">
+        <div class="flex flex-wrap gap-12" style="justify-content:center">
+          <a href="pages/register.html" class="btn btn-primary">Create Account</a>
+          <a href="pages/login.html" class="btn btn-outline">Login</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="footer"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/mock-api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/nav.js"></script>
+  <script>
+    (function () {
+      const slides = document.querySelectorAll('.hero-slide');
+      const dotsWrap = document.getElementById('heroDots');
+      let index = 0;
+      let timer;
+
+      slides.forEach((_, i) => {
+        const dot = document.createElement('button');
+        dot.className = 'hero-dot' + (i === 0 ? ' active' : '');
+        dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+        dot.addEventListener('click', () => show(i, true));
+        dotsWrap.appendChild(dot);
+      });
+
+      const dots = dotsWrap.querySelectorAll('.hero-dot');
+
+      function show(i, manual) {
+        slides[index].classList.remove('active');
+        dots[index].classList.remove('active');
+        index = (i + slides.length) % slides.length;
+        slides[index].classList.add('active');
+        dots[index].classList.add('active');
+        if (manual) restart();
+      }
+
+      function next() {
+        show(index + 1);
+      }
+
+      function restart() {
+        clearInterval(timer);
+        timer = setInterval(next, 5000);
+      }
+
+      restart();
+    })();
+  </script>
+</body>
+</html>

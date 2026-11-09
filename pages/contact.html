@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Raj Gautam">
+  <title>Contact - Ration Seva</title>
+  <link rel="icon" href="../images/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/shared.css">
+</head>
+<body>
+  <div class="tricolor-top"></div>
+  <div id="navbar"></div>
+
+  <main class="container-narrow">
+    <div class="page-header">
+      <h1>Contact Us</h1>
+      <p>Questions, feedback or support requests.</p>
+    </div>
+
+    <div id="alert"></div>
+
+    <div class="card">
+      <form id="contactForm">
+        <div class="form-group">
+          <label class="form-label" for="cname">Your Name</label>
+          <input type="text" id="cname" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cemail">Email</label>
+          <input type="email" id="cemail" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cmessage">Message</label>
+          <textarea id="cmessage" class="form-input" rows="5" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Send Message</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">Support</h3>
+      <p class="text-muted text-sm" style="line-height:1.8">
+        Email: <strong>support@rationseva.example</strong><br>
+        Helpline: <strong>1800-000-000</strong> (toll free, 9 AM to 6 PM)<br>
+        Developer: <strong>Raj Gautam</strong>
+      </p>
+    </div>
+  </main>
+
+  <div id="footer"></div>
+  <script src="../js/config.js"></script>
+  <script src="../js/mock-api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/nav.js"></script>
+  <script>
+    document.getElementById('contactForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('cname').value.trim();
+      const email = document.getElementById('cemail').value.trim();
+      const message = document.getElementById('cmessage').value.trim();
+      const subject = encodeURIComponent(`Ration Seva contact from ${name}`);
+      const body = encodeURIComponent(`From: ${name} <${email}>\n\n${message}`);
+      window.location.href = `mailto:support@rationseva.example?subject=${subject}&body=${body}`;
+      showAlert('alert', 'Opening your email app. You can also reach us at support@rationseva.example.', 'info');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Raj Gautam">
+  <title>About - Ration Seva</title>
+  <link rel="icon" href="../images/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/shared.css">
+</head>
+<body>
+  <div class="tricolor-top"></div>
+  <div id="navbar"></div>
+
+  <main class="container">
+    <div class="page-header">
+      <h1>About Ration Seva</h1>
+      <p>A digital Public Distribution System built for transparency and trust.</p>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">Our Mission</h3>
+      <p class="text-muted" style="line-height:1.75">
+        Ration Seva digitises the Public Distribution System so that every beneficiary knows exactly what
+        they are entitled to, every shopkeeper records distributions transparently, and administrators get
+        real-time visibility into the system. It replaces paper registers with verifiable digital receipts.
+      </p>
+    </div>
+
+    <div class="feature-grid" style="margin-bottom:20px">
+      <div class="feature-box">
+        <div class="feature-icon">&#128100;</div>
+        <h3>For Beneficiaries</h3>
+        <p>View your ration card, monthly quota and complete distribution history at any time.</p>
+      </div>
+      <div class="feature-box">
+        <div class="feature-icon">&#127978;</div>
+        <h3>For Shopkeepers</h3>
+        <p>Verify cards, distribute the monthly quota once per month and generate digital receipts.</p>
+      </div>
+      <div class="feature-box">
+        <div class="feature-icon">&#128737;&#65039;</div>
+        <h3>For Administrators</h3>
+        <p>Track system statistics, manage cards, review fraud flags and export reports.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">Technology</h3>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Layer</th><th>Technology</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr><td>API Gateway</td><td>TypeScript + Express</td><td>Auth, validation, rate limiting, routing</td></tr>
+            <tr><td>Core Service</td><td>JavaScript (Node.js) + MongoDB</td><td>Business logic and persistence</td></tr>
+            <tr><td>ML Service</td><td>Python + FastAPI + scikit-learn</td><td>Fraud detection and quota prediction</td></tr>
+            <tr><td>Frontend</td><td>HTML, CSS, Vanilla JS</td><td>Responsive multi-page interface</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">Developer</h3>
+      <p class="text-muted" style="line-height:1.75">
+        Designed and developed by <strong>Raj Gautam</strong> as a full-stack demonstration of a secure,
+        accessible digital public distribution platform.
+      </p>
+    </div>
+  </main>
+
+  <div id="footer"></div>
+  <script src="../js/config.js"></script>
+  <script src="../js/mock-api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Raj Gautam">
+  <title>Distribute Ration - Ration Seva</title>
+  <link rel="icon" href="../images/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/shared.css">
+</head>
+<body>
+  <div class="tricolor-top"></div>
+  <div id="navbar"></div>
+
+  <main class="container-narrow">
+    <div class="breadcrumb"><a href="shopkeeper-dashboard.html">Dashboard</a><span>&rsaquo;</span><span>Distribute</span></div>
+    <div class="page-header">
+      <h1>Distribute Ration</h1>
+      <p>Record a ration distribution for a beneficiary.</p>
+    </div>
+
+    <div id="alert"></div>
+
+    <div class="card">
+      <div class="form-group">
+        <label class="form-label" for="cardNumber">Ration Card Number</label>
+        <input type="text" id="cardNumber" class="form-input" placeholder="RC-2026-RG-4829">
+      </div>
+      <button onclick="loadCard()" class="btn btn-outline" id="loadBtn">Load Card Details</button>
+    </div>
+
+    <div id="cardDetails"></div>
+  </main>
+
+  <div id="footer"></div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/mock-api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/nav.js"></script>
+  <script>
+    const user = requireAuth(['shopkeeper']);
+    const PRICES = { Rice: 3, Wheat: 2, Sugar: 10, Kerosene: 20 };
+    let currentQuota = null;
+    let currentCard = null;
+
+    function buildItems(q) {
+      return [
+        { itemName: 'Rice', quantity: q.rice, unit: 'kg', price: PRICES.Rice },
+        { itemName: 'Wheat', quantity: q.wheat, unit: 'kg', price: PRICES.Wheat },
+        { itemName: 'Sugar', quantity: q.sugar, unit: 'kg', price: PRICES.Sugar },
+        { itemName: 'Kerosene', quantity: q.kerosene, unit: 'L', price: PRICES.Kerosene }
+      ];
+    }
+
+    async function loadCard() {
+      const cardNumber = document.getElementById('cardNumber').value.trim();
+      if (!cardNumber) return showAlert('alert', 'Enter a card number.', 'danger');
+
+      const btn = document.getElementById('loadBtn');
+      btn.disabled = true;
+      btn.textContent = 'Loading...';
+
+      try {
+        const data = await apiCall(`/shopkeeper/check-card/${encodeURIComponent(cardNumber)}`);
+        if (data.alreadyDistributed) {
+          showAlert('alert', 'Ration already distributed this month for this card.', 'warning');
+          document.getElementById('cardDetails').innerHTML = '';
+          return;
+        }
+
+        currentCard = cardNumber;
+        currentQuota = data.card.monthlyQuota;
+        const owner = data.card.userId || {};
+        const items = buildItems(currentQuota);
+        const total = items.reduce((s, i) => s + i.price * i.quantity, 0);
+
+        document.getElementById('cardDetails').innerHTML = `
+          <div class="card">
+            <h3 class="card-title">Confirm Distribution</h3>
+            <p class="text-muted text-sm" style="margin-bottom:18px">
+              Beneficiary: <strong>${escapeHtml(owner.name || '-')}</strong>
+              &middot; ${escapeHtml(data.card.category)} &middot; ${owner.familyMembers || '-'} members
+            </p>
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>Item</th><th>Quantity</th><th>Price</th><th>Total</th></tr></thead>
+                <tbody>
+                  ${items.map((i) => `
+                    <tr>
+                      <td>${escapeHtml(i.itemName)}</td>
+                      <td>${i.quantity} ${escapeHtml(i.unit)}</td>
+                      <td>${formatINR(i.price)}</td>
+                      <td>${formatINR(i.price * i.quantity)}</td>
+                    </tr>`).join('')}
+                  <tr style="background:#f3f4f6;font-weight:800">
+                    <td colspan="3">TOTAL</td>
+                    <td>${formatINR(total)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <button onclick="confirmDistribute()" class="btn btn-success btn-block mt-24" id="confirmBtn">
+              &#10003; Confirm &amp; Distribute
+            </button>
+          </div>
+        `;
+      } catch (err) {
+        showAlert('alert', err.message, 'danger');
+        document.getElementById('cardDetails').innerHTML = '';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Load Card Details';
+      }
+    }
+
+    async function confirmDistribute() {
+      const btn = document.getElementById('confirmBtn');
+      btn.disabled = true;
+      btn.textContent = 'Distributing...';
+
+      try {
+        const res = await apiCall('/shopkeeper/distribute', {
+          method: 'POST',
+          body: {
+            cardNumber: currentCard,
+            items: buildItems(currentQuota)
+          }
+        });
+
+        showAlert('alert', 'Ration distributed successfully. Receipt: ' + res.receipt._id.slice(-8), 'success');
+        document.getElementById('cardDetails').innerHTML = '';
+        document.getElementById('cardNumber').value = '';
+
+        if (res.fraudAlert) {
+          setTimeout(() => showAlert('alert', res.fraudAlert, 'warning'), 1200);
+        }
+        setTimeout(() => (window.location.href = 'shop-history.html'), 2600);
+      } catch (err) {
+        showAlert('alert', err.message, 'danger');
+        btn.disabled = false;
+        btn.textContent = '\u2713 Confirm & Distribute';
+      }
+    }
+
+    const urlCard = new URLSearchParams(window.location.search).get('card');
+    if (urlCard) {
+      document.getElementById('cardNumber').value = urlCard;
+      loadCard();
+    }
+  </script>
+</body>
+</html>

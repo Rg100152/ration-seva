@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://rajgautam.github.io/ration-seva/sitemap.xml

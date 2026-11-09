@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Raj Gautam">
+  <title>Dashboard - Admin | Ration Seva</title>
+  <link rel="icon" href="../images/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/shared.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+  <div class="tricolor-top"></div>
+  <div id="navbar"></div>
+
+  <main class="container">
+    <div class="breadcrumb"><a href="dashboard.html">Dashboard</a><span>&rsaquo;</span><span>Admin</span></div>
+
+    <div class="page-header">
+      <h1>Admin Dashboard</h1>
+      <p>System-wide analytics and management.</p>
+    </div>
+
+    <div id="alert"></div>
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card"><div class="spinner" style="border-top-color:#fff"></div></div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">Quick Actions</h3>
+      <div class="flex flex-wrap gap-12">
+        <a href="users.html" class="btn btn-primary">&#128101; Manage Users</a>
+        <a href="cards.html" class="btn btn-primary">&#129697; Manage Cards</a>
+        <a href="reports.html" class="btn btn-outline">&#128202; Reports</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-row">
+        <h3 class="card-title">Fraud-flagged Distributions</h3>
+        <a href="reports.html" style="font-size:13px;font-weight:700;text-decoration:none">View Reports &rarr;</a>
+      </div>
+      <div id="fraudList"><div class="spinner"></div></div>
+    </div>
+  </main>
+
+  <div id="footer"></div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/mock-api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/nav.js"></script>
+  <script>
+    const user = requireAuth(['admin']);
+    if (user) load();
+
+    async function load() {
+      try {
+        const stats = await apiCall('/admin/stats');
+        document.getElementById('statsGrid').innerHTML = `
+          <div class="stat-card"><div class="stat-icon">&#128101;</div><h3>${stats.totalUsers}</h3><p>Beneficiaries</p></div>
+          <div class="stat-card"><div class="stat-icon">&#127978;</div><h3>${stats.totalShops}</h3><p>Shopkeepers</p></div>
+          <div class="stat-card"><div class="stat-icon">&#129697;</div><h3>${stats.totalCards}</h3><p>Active Cards</p></div>
+          <div class="stat-card"><div class="stat-icon">&#128197;</div><h3>${stats.monthDistributions}</h3><p>Distributions This Month</p></div>
+          <div class="stat-card"><div class="stat-icon">&#9888;&#65039;</div><h3>${stats.fraudCount || 0}</h3><p>Fraud Flags</p></div>
+        `;
+
+        const fraud = await apiCall('/admin/fraud');
+        if (!fraud.length) {
+          document.getElementById('fraudList').innerHTML = `
+            <div class="empty-state"><div class="icon">&#9989;</div><p>No fraud flags. All clear.</p></div>
+          `;
+        } else {
+          document.getElementById('fraudList').innerHTML = `
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>Card</th><th>Month</th><th>Amount</th><th>Fraud Score</th><th>Date</th></tr></thead>
+                <tbody>
+                  ${fraud.slice(0, 8).map((f) => `
+                    <tr>
+                      <td class="mono">${escapeHtml(f.cardNumber)}</td>
+                      <td>${escapeHtml(f.month)}</td>
+                      <td>${formatINR(f.totalAmount)}</td>
+                      <td><span class="badge badge-danger">${Number(f.fraudScore).toFixed(2)}</span></td>
+                      <td>${formatDate(f.distributedAt)}</td>
+                    </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        }
+      } catch (err) {
+        showAlert('alert', err.message, 'danger');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Raj Gautam">
+  <title>Manage Cards - Ration Seva</title>
+  <link rel="icon" href="../images/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/shared.css">
+</head>
+<body>
+  <div class="tricolor-top"></div>
+  <div id="navbar"></div>
+
+  <main class="container">
+    <div class="breadcrumb"><a href="admin-dashboard.html">Dashboard</a><span>&rsaquo;</span><span>Cards</span></div>
+    <div class="page-header">
+      <h1>Manage Ration Cards</h1>
+      <p>Activate or deactivate ration cards.</p>
+    </div>
+
+    <div id="alert"></div>
+    <div id="cardsList"><div class="empty-state"><div class="spinner"></div><p style="margin-top:14px">Loading...</p></div></div>
+  </main>
+
+  <div id="footer"></div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/mock-api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/nav.js"></script>
+  <script>
+    requireAuth(['admin']);
+
+    async function load() {
+      try {
+        const cards = await apiCall('/admin/cards');
+        if (!cards.length) {
+          document.getElementById('cardsList').innerHTML = `
+            <div class="empty-state"><div class="icon">&#129697;</div><p>No cards found</p></div>`;
+          return;
+        }
+
+        document.getElementById('cardsList').innerHTML = `
+          <div class="card">
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>Card Number</th><th>Holder</th><th>Category</th><th>Quota</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody>
+                  ${cards.map((c) => {
+                    const q = c.monthlyQuota || {};
+                    const owner = c.userId || {};
+                    return `
+                      <tr>
+                        <td class="mono"><strong>${escapeHtml(c.cardNumber)}</strong></td>
+                        <td>${escapeHtml(owner.name || '-')}</td>
+                        <td><span class="badge badge-info">${escapeHtml(c.category)}</span></td>
+                        <td class="text-sm">${q.rice}kg rice, ${q.wheat}kg wheat</td>
+                        <td>${c.isActive
+                          ? '<span class="badge badge-success">Active</span>'
+                          : '<span class="badge badge-danger">Inactive</span>'}</td>
+                        <td>
+                          <button class="btn btn-sm ${c.isActive ? 'btn-danger' : 'btn-success'}"
+                            onclick="toggleCard('${c._id}')">
+                            ${c.isActive ? 'Deactivate' : 'Activate'}
+                          </button>
+                        </td>
+                      </tr>`;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      } catch (err) {
+        showAlert('alert', err.message, 'danger');
+      }
+    }
+
+    async function toggleCard(cardId) {
+      try {
+        const res = await apiCall(`/admin/card/${cardId}/toggle`, { method: 'PUT' });
+        showAlert('alert', `Card ${res.isActive ? 'activated' : 'deactivated'} successfully.`, 'success');
+        load();
+      } catch (err) {
+        showAlert('alert', err.message, 'danger');
+      }
+    }
+
+    load();
+  </script>
+</body>
+</html>

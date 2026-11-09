@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Raj Gautam">
+  <title>Manage Users - Ration Seva</title>
+  <link rel="icon" href="../images/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/shared.css">
+</head>
+<body>
+  <div class="tricolor-top"></div>
+  <div id="navbar"></div>
+
+  <main class="container">
+    <div class="breadcrumb"><a href="admin-dashboard.html">Dashboard</a><span>&rsaquo;</span><span>Users</span></div>
+    <div class="page-header">
+      <h1>Manage Beneficiaries</h1>
+      <p>All registered beneficiaries in the system.</p>
+    </div>
+
+    <div id="alert"></div>
+
+    <div class="card">
+      <div class="form-group mb-0">
+        <input type="search" id="search" class="form-input" placeholder="Search by name, Aadhaar or category...">
+      </div>
+    </div>
+
+    <div id="usersList"><div class="empty-state"><div class="spinner"></div><p style="margin-top:14px">Loading...</p></div></div>
+  </main>
+
+  <div id="footer"></div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/mock-api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/nav.js"></script>
+  <script>
+    requireAuth(['admin']);
+    let allUsers = [];
+
+    async function load() {
+      try {
+        allUsers = await apiCall('/admin/users');
+        render(allUsers);
+      } catch (err) {
+        showAlert('alert', err.message, 'danger');
+      }
+    }
+
+    function render(list) {
+      if (!list.length) {
+        document.getElementById('usersList').innerHTML = `
+          <div class="empty-state"><div class="icon">&#128101;</div><p>No users found</p></div>`;
+        return;
+      }
+      document.getElementById('usersList').innerHTML = `
+        <div class="card">
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr><th>Name</th><th>Aadhaar</th><th>Phone</th><th>Family</th><th>Category</th><th>Joined</th></tr></thead>
+              <tbody>
+                ${list.map((u) => `
+                  <tr>
+                    <td><strong>${escapeHtml(u.name)}</strong></td>
+                    <td class="mono">${escapeHtml(u.aadhaar)}</td>
+                    <td>${escapeHtml(u.phone || '-')}</td>
+                    <td>${u.familyMembers || '-'}</td>
+                    <td><span class="badge badge-info">${escapeHtml(u.category || '-')}</span></td>
+                    <td>${formatDate(u.createdAt)}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    document.getElementById('search').addEventListener('input', debounce((e) => {
+      const q = e.target.value.toLowerCase().trim();
+      if (!q) return render(allUsers);
+      render(allUsers.filter((u) =>
+        (u.name || '').toLowerCase().includes(q) ||
+        (u.aadhaar || '').includes(q) ||
+        (u.category || '').toLowerCase().includes(q)
+      ));
+    }, 200));
+
+    load();
+  </script>
+</body>
+</html>

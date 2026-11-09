@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Raj Gautam">
+  <title>Profile - Ration Seva</title>
+  <link rel="icon" href="../images/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/shared.css">
+</head>
+<body>
+  <div class="tricolor-top"></div>
+  <div id="navbar"></div>
+
+  <main class="container-narrow">
+    <div class="breadcrumb"><a href="dashboard.html">Dashboard</a><span>&rsaquo;</span><span>Profile</span></div>
+    <div class="page-header">
+      <h1>My Profile</h1>
+      <p>View and update your account details.</p>
+    </div>
+
+    <div id="alert"></div>
+
+    <div class="card">
+      <div class="flex gap-12" style="align-items:center;margin-bottom:20px">
+        <div class="avatar" id="avatar" style="width:56px;height:56px;font-size:18px">RG</div>
+        <div>
+          <div style="font-weight:800;font-size:17px" id="headerName">...</div>
+          <div class="text-muted text-sm" id="headerMeta">...</div>
+        </div>
+      </div>
+
+      <form id="profileForm">
+        <div class="form-group">
+          <label class="form-label" for="name">Full Name</label>
+          <input type="text" id="name" class="form-input" required>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="aadhaar">Aadhaar (read-only)</label>
+            <input type="text" id="aadhaar" class="form-input" disabled>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="role">Role (read-only)</label>
+            <input type="text" id="role" class="form-input" disabled>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="phone">Phone</label>
+            <input type="tel" id="phone" class="form-input" maxlength="10">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="familyMembers">Family Members</label>
+            <input type="number" id="familyMembers" class="form-input" min="1" max="20">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="category">Category</label>
+          <select id="category" class="form-select">
+            <option value="APL">APL</option>
+            <option value="BPL">BPL</option>
+            <option value="AAY">AAY</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="address">Address</label>
+          <input type="text" id="address" class="form-input">
+        </div>
+        <button type="submit" class="btn btn-primary" id="saveBtn">Save Changes</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">Change Password</h3>
+      <form id="passwordForm">
+        <div class="form-group">
+          <label class="form-label" for="currentPassword">Current Password</label>
+          <input type="password" id="currentPassword" class="form-input" placeholder="Leave blank if admin reset">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="newPassword">New Password</label>
+          <input type="password" id="newPassword" class="form-input" minlength="8" placeholder="At least 8 characters" required>
+        </div>
+        <button type="submit" class="btn btn-outline" id="pwBtn">Update Password</button>
+      </form>
+    </div>
+  </main>
+
+  <div id="footer"></div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/mock-api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/nav.js"></script>
+  <script>
+    const user = requireAuth();
+
+    async function load() {
+      try {
+        const profile = await apiCall(`/profile/${user.id}`);
+        document.getElementById('name').value = profile.name || '';
+        document.getElementById('aadhaar').value = profile.aadhaar || '';
+        document.getElementById('role').value = profile.role || '';
+        document.getElementById('phone').value = profile.phone || '';
+        document.getElementById('familyMembers').value = profile.familyMembers || 1;
+        document.getElementById('category').value = profile.category || 'BPL';
+        document.getElementById('address').value = profile.address || '';
+
+        document.getElementById('avatar').textContent = initials(profile.name);
+        document.getElementById('headerName').textContent = profile.name;
+        document.getElementById('headerMeta').textContent =
+          `${profile.role} \u00B7 ${profile.aadhaar} \u00B7 ${profile.category}`;
+      } catch (err) {
+        showAlert('alert', err.message, 'danger');
+      }
+    }
+
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('saveBtn');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+      try {
+        const res = await apiCall(`/profile/${user.id}`, {
+          method: 'PUT',
+          body: {
+            name: document.getElementById('name').value.trim(),
+            phone: document.getElementById('phone').value.trim(),
+            familyMembers: parseInt(document.getElementById('familyMembers').value, 10),
+            category: document.getElementById('category').value,
+            address: document.getElementById('address').value.trim()
+          }
+        });
+        const merged = { ...user, ...res.user };
+        localStorage.setItem('user', JSON.stringify(merged));
+        document.getElementById('avatar').textContent = initials(merged.name);
+        document.getElementById('headerName').textContent = merged.name;
+        showAlert('alert', 'Profile updated successfully.', 'success');
+        renderNavbar();
+      } catch (err) {
+        showAlert('alert', err.message, 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save Changes';
+      }
+    });
+
+    document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('pwBtn');
+      btn.disabled = true;
+      try {
+        await apiCall(`/profile/${user.id}/password`, {
+          method: 'PUT',
+          body: {
+            currentPassword: document.getElementById('currentPassword').value,
+            newPassword: document.getElementById('newPassword').value
+          }
+        });
+        showAlert('alert', 'Password updated successfully.', 'success');
+        document.getElementById('passwordForm').reset();
+      } catch (err) {
+        showAlert('alert', err.message, 'danger');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    if (user) load();
+  </script>
+</body>
+</html>

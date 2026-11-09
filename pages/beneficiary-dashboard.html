@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Raj Gautam">
+  <title>Dashboard - Beneficiary | Ration Seva</title>
+  <link rel="icon" href="../images/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/shared.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body>
+  <div class="tricolor-top"></div>
+  <div id="navbar"></div>
+
+  <main class="container">
+    <div class="breadcrumb"><a href="dashboard.html">Dashboard</a><span>&rsaquo;</span><span>Overview</span></div>
+
+    <div class="page-header">
+      <h1>Welcome, <span id="userName">...</span> &#128075;</h1>
+      <p>Here is an overview of your ration card and entitlement.</p>
+    </div>
+
+    <div id="alert"></div>
+    <div class="stats-grid" id="quotaGrid">
+      <div class="stat-card"><div class="spinner" style="border-top-color:#fff"></div></div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">Quick Actions</h3>
+      <div class="flex flex-wrap gap-12">
+        <a href="my-card.html" class="btn btn-primary">View Ration Card</a>
+        <a href="history.html" class="btn btn-outline">Distribution History</a>
+        <a href="profile.html" class="btn btn-outline">Edit Profile</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-row">
+        <h3 class="card-title">Recent Distributions</h3>
+        <a href="history.html" style="font-size:13px;font-weight:700;text-decoration:none">View All &rarr;</a>
+      </div>
+      <div id="recentHistory"><div class="spinner"></div></div>
+    </div>
+  </main>
+
+  <div id="footer"></div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/mock-api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/nav.js"></script>
+  <script>
+    const user = requireAuth(['beneficiary']);
+    if (user) {
+      document.getElementById('userName').textContent = user.name;
+      loadDashboard();
+    }
+
+    async function loadDashboard() {
+      try {
+        const card = await apiCall(`/beneficiary/my-card/${user.id}`);
+        const q = card.monthlyQuota;
+        document.getElementById('quotaGrid').innerHTML = `
+          <div class="stat-card"><div class="stat-icon">&#127834;</div><h3>${q.rice} kg</h3><p>Rice</p></div>
+          <div class="stat-card"><div class="stat-icon">&#127806;</div><h3>${q.wheat} kg</h3><p>Wheat</p></div>
+          <div class="stat-card"><div class="stat-icon">&#127852;</div><h3>${q.sugar} kg</h3><p>Sugar</p></div>
+          <div class="stat-card"><div class="stat-icon">&#128739;</div><h3>${q.kerosene} L</h3><p>Kerosene</p></div>
+        `;
+
+        const history = await apiCall(`/beneficiary/history/${card.cardNumber}`);
+        const recent = history.slice(0, 3);
+
+        if (!recent.length) {
+          document.getElementById('recentHistory').innerHTML = `
+            <div class="empty-state"><div class="icon">&#128237;</div><p>No distributions yet</p></div>
+          `;
+        } else {
+          document.getElementById('recentHistory').innerHTML = `
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>Month</th><th>Items</th><th>Amount</th><th>Date</th></tr></thead>
+                <tbody>
+                  ${recent.map((h) => `
+                    <tr>
+                      <td><strong>${escapeHtml(h.month)}</strong></td>
+                      <td>${escapeHtml(itemSummary(h.items))}</td>
+                      <td>${formatINR(h.totalAmount)}</td>
+                      <td>${formatDate(h.distributedAt)}</td>
+                    </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        }
+      } catch (err) {
+        showAlert('alert', err.message, 'danger');
+        document.getElementById('quotaGrid').innerHTML = '';
+        document.getElementById('recentHistory').innerHTML = '<div class="empty-state"><div class="icon">&#9888;&#65039;</div><p>Could not load data</p></div>';
+      }
+    }
+  </script>
+</body>
+</html>

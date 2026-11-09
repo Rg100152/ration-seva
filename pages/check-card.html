@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Raj Gautam">
+  <title>Check Card - Ration Seva</title>
+  <link rel="icon" href="../images/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/shared.css">
+</head>
+<body>
+  <div class="tricolor-top"></div>
+  <div id="navbar"></div>
+
+  <main class="container-narrow">
+    <div class="breadcrumb"><a href="shopkeeper-dashboard.html">Dashboard</a><span>&rsaquo;</span><span>Check Card</span></div>
+    <div class="page-header">
+      <h1>Verify Ration Card</h1>
+      <p>Enter a card number to verify the beneficiary and their quota.</p>
+    </div>
+
+    <div id="alert"></div>
+
+    <div class="card">
+      <div class="flex gap-12 flex-wrap">
+        <input type="text" id="cardInput" class="form-input" placeholder="RC-2026-RG-4829" style="flex:1;min-width:200px">
+        <button onclick="verifyCard()" class="btn btn-primary" id="verifyBtn">Verify</button>
+      </div>
+    </div>
+
+    <div id="result"></div>
+  </main>
+
+  <div id="footer"></div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/mock-api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/nav.js"></script>
+  <script>
+    requireAuth(['shopkeeper']);
+
+    async function verifyCard() {
+      const cardNumber = document.getElementById('cardInput').value.trim();
+      if (!cardNumber) return showAlert('alert', 'Enter a card number.', 'danger');
+
+      const btn = document.getElementById('verifyBtn');
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+
+      try {
+        const data = await apiCall(`/shopkeeper/check-card/${encodeURIComponent(cardNumber)}`);
+
+        if (data.alreadyDistributed) {
+          document.getElementById('result').innerHTML = `
+            <div class="card">
+              <div class="alert alert-warning" style="margin:0">
+                Ration has already been distributed for <strong>${escapeHtml(cardNumber)}</strong> this month.
+              </div>
+            </div>`;
+          return;
+        }
+
+        const c = data.card;
+        const q = c.monthlyQuota;
+        const owner = c.userId || {};
+
+        document.getElementById('result').innerHTML = `
+          <div class="card">
+            <div class="alert alert-success">Valid card. Ready to distribute.</div>
+            <div class="table-wrap">
+              <table class="table">
+                <tr><td><strong>Name</strong></td><td>${escapeHtml(owner.name || '-')}</td></tr>
+                <tr><td><strong>Phone</strong></td><td>${escapeHtml(owner.phone || 'N/A')}</td></tr>
+                <tr><td><strong>Address</strong></td><td>${escapeHtml(owner.address || 'N/A')}</td></tr>
+                <tr><td><strong>Family</strong></td><td>${owner.familyMembers || '-'} members</td></tr>
+                <tr><td><strong>Category</strong></td><td><span class="badge badge-info">${escapeHtml(c.category)}</span></td></tr>
+                <tr><td><strong>Status</strong></td><td><span class="badge badge-success">Active</span></td></tr>
+              </table>
+            </div>
+
+            <h3 class="card-title" style="margin-top:24px">Monthly Quota</h3>
+            <div class="quota-grid">
+              <div class="quota-tile"><div class="emoji">&#127834;</div><strong>${q.rice} kg</strong><span>Rice</span></div>
+              <div class="quota-tile"><div class="emoji">&#127806;</div><strong>${q.wheat} kg</strong><span>Wheat</span></div>
+              <div class="quota-tile"><div class="emoji">&#127852;</div><strong>${q.sugar} kg</strong><span>Sugar</span></div>
+              <div class="quota-tile"><div class="emoji">&#128739;</div><strong>${q.kerosene} L</strong><span>Kerosene</span></div>
+            </div>
+
+            <div class="mt-24">
+              <a href="distribute.html?card=${encodeURIComponent(cardNumber)}" class="btn btn-primary">Proceed to Distribute &rarr;</a>
+            </div>
+          </div>
+        `;
+      } catch (err) {
+        showAlert('alert', err.message, 'danger');
+        document.getElementById('result').innerHTML = '';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Verify';
+      }
+    }
+
+    const urlCard = new URLSearchParams(window.location.search).get('card');
+    if (urlCard) {
+      document.getElementById('cardInput').value = urlCard;
+      verifyCard();
+    }
+  </script>
+</body>
+</html>
